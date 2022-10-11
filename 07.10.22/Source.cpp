@@ -1,9 +1,10 @@
 #include <iostream>
+#include <cstring>
 using namespace std;
 
 class Transport
 {
-	string type;
+	char* type;
 	string color;
 	int speed;
 	int fuelcons;
@@ -11,12 +12,16 @@ class Transport
 public:
 	Transport()
 	{
-		type = color = "";
+		type = nullptr;
+		color = "";
 		speed = fuelcons = passenger = 0;
 	}
-	Transport(string t, string c, int s, int f, int p)
+	Transport(const char* t, string c, int s, int f, int p)
 	{
-		type = t;
+		if (type != nullptr)
+			delete[]type;
+		type = new char[strlen(t) + 1];
+		strcpy_s(type, strlen(t) + 1, t);
 		color = c;
 		speed = s;
 		fuelcons = f;
@@ -33,7 +38,13 @@ public:
 	virtual void Init()
 	{
 		cout << "Transport: ";
-		cin >> type;
+		char* temp = new char[128];
+		cin >> temp;
+		if (type != nullptr)
+			delete[]type;
+		type = new char(strlen(temp) + 1);
+		strcpy_s(type, strlen(temp) + 1, temp);
+		delete[]temp;
 		cout << "Color: ";
 		cin >> color;
 		cout << "Speed: ";
@@ -47,19 +58,29 @@ public:
 	{
 		return fuelcons;
 	}
+	virtual~Transport();
 };
+
+Transport::~Transport()
+{
+	cout << "Transport destruct\n";
+	delete[]type;
+}
 
 class Plane :public Transport
 {
-	string company;
+	char* company;
 public:
 	Plane()
 	{
-		company = "";
+		company = nullptr;
 	}
-	Plane(string t, string c, int s, int f, int p, string co) :Transport(t, c, s, f, p)
+	Plane(const char* t, string c, int s, int f, int p, const char* co) :Transport(t, c, s, f, p)
 	{
-		company = co;
+		if (company != nullptr)
+			delete[]company;
+		company = new char[strlen(co) + 1];
+		strcpy_s(company, strlen(co) + 1, co);
 	}
 	void Show()
 	{
@@ -70,59 +91,86 @@ public:
 	{
 		Transport::Init();
 		cout << "Company: ";
-		cin >> company;
+		char* temp = new char[128];
+		cin >> temp;
+		if (company != nullptr)
+			delete[]company;
+		company = new char(strlen(temp) + 1);
+		strcpy_s(company, strlen(temp) + 1, temp);
+		delete[]temp;
 	}
 	int GetFuel()
 	{
 		return Transport::GetFuel();
+	}
+	~Plane()
+	{
+		cout << "Plane Destruct\n";
+		delete[]company;
 	}
 };
 
 class Cycle :public Transport
 {
-	double tire_size;
+	double* tire_size;
 public:
 	Cycle()
 	{
-		tire_size = 0;
+		tire_size = nullptr;
 	}
-	Cycle(string t, string c, int s, int f, int p, double ti) :Transport(t, c, s, 0, p)
+	Cycle(const char* t, string c, int s, int f, int p, double ti) :Transport(t, c, s, 0, p)
 	{
-		tire_size = ti;
+		if (tire_size != nullptr)
+			delete tire_size;
+		tire_size = new double;
+		*tire_size = ti;
 	}
 	void Show()
 	{
 		Transport::Show();
-		cout << "Tire Diameter: " << tire_size << " sm\n";
+		cout << "Tire Diameter: " << *tire_size << " sm\n";
 	}
 	void Init()
 	{
 		Transport::Init();
 		cout << "Tire size: ";
-		cin >> tire_size;
+		if (tire_size != nullptr)
+			delete tire_size;
+		tire_size = new double;
+		double temp;
+		cin >> temp;
+		*tire_size = temp;
 	}
 	int GetFuel()
 	{
 		return Transport::GetFuel();
 	}
+	~Cycle()
+	{
+		cout << "Cycle Destruct\n";
+		delete tire_size;
+	}
 };
 
 class Jeep :public Transport
 {
-	bool offroad;
+	bool* offroad;
 public:
 	Jeep()
 	{
-		offroad = false;
+		offroad = nullptr;
 	}
-	Jeep(string t, string c, int s, int f, int p, bool off) :Transport(t, c, s, f, p)
+	Jeep(const char* t, string c, int s, int f, int p, bool off) :Transport(t, c, s, f, p)
 	{
-		offroad = f;
+		if (offroad != nullptr)
+			delete offroad;
+		offroad = new bool;
+		*offroad = off;
 	}
 	void Show()
 	{
 		Transport::Show();
-		if (offroad)
+		if (*offroad)
 			cout << "Can drive on offroad\n";
 		else
 			cout << "Cant drive on offroad\n";
@@ -131,69 +179,105 @@ public:
 	{
 		Transport::Init();
 		cout << "For offroad?\t1.Yes\t0.No\n";
-		cin >> offroad;
+		if (offroad != nullptr)
+			delete offroad;
+		offroad = new bool;
+		bool temp;
+		cin >> temp;
+		*offroad = temp;
 	}
 	int GetFuel()
 	{
 		return Transport::GetFuel();
+	}
+	~Jeep()
+	{
+		cout << "Jeep Destruct\n";
+		delete offroad;
 	}
 };
 
 class Ship :public Transport
 {
-	double carr_cap;
+	double* carr_cap;
 public:
 	Ship()
 	{
 		carr_cap = 0;
 	}
-	Ship(string t, string c, int s, int f, int p, double cc) :Transport(t, c, s, f, p)
+	Ship(const char* t, string c, int s, int f, int p, double cc) :Transport(t, c, s, f, p)
 	{
-		carr_cap = cc;
+		if (carr_cap != nullptr)
+			delete carr_cap;
+		carr_cap = new double;
+		*carr_cap = cc;
 	}
 	void Show()
 	{
 		Transport::Show();
-		cout << "Carrying capacity: " << carr_cap << " tones\n";
+		cout << "Carrying capacity: " << *carr_cap << " tones\n";
 	}
 	void Init()
 	{
 		Transport::Init();
 		cout << "Carrying capacity: ";
-		cin >> carr_cap;
+		if (carr_cap != nullptr)
+			delete carr_cap;
+		carr_cap = new double;
+		double temp;
+		cin >> temp;
+		*carr_cap = temp;
 	}
 	int GetFuel()
 	{
 		return Transport::GetFuel();
+	}
+	~Ship()
+	{
+		cout << "Ship Destruct\n";
+		delete carr_cap;
 	}
 };
 
 class Truck :public Transport
 {
-	int HP;
+	int* HP;
 public:
 	Truck()
 	{
-		HP = 0;
+		HP = nullptr;
 	}
-	Truck(string t, string c, int s, int f, int p, int hp) :Transport(t, c, s, f, p)
+	Truck(const char* t, string c, int s, int f, int p, int hp) :Transport(t, c, s, f, p)
 	{
-		HP = hp;
+		if (HP != nullptr)
+			delete HP;
+		HP = new int;
+		*HP = hp;
 	}
 	void Show()
 	{
 		Transport::Show();
-		cout << "Horse power: " << HP << "\n";
+		cout << "Horse power: " << *HP << "\n";
 	}
 	void Init()
 	{
 		Transport::Init();
 		cout << "Horse power: ";
-		cin >> HP;
+		if (HP != nullptr)
+			delete HP;
+		HP = new int;
+		double temp;
+		cin >> temp;
+		*HP = temp;
 	}
 	int GetFuel()
 	{
 		return Transport::GetFuel();
+	}
+	~Truck()
+	{
+		cout << "Truck Destruct\n";
+		delete HP;
 	}
 };
 
